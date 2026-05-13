@@ -59,38 +59,6 @@ The template gives users a ready repository with:
 
 This template is meant to reduce manual setup and establish a consistent engineering baseline across repositories.
 
-## Supported Project Types
-
-### Python
-
-Use this when the repository only needs Python code.
-
-Typical output:
-
-- one Python package folder
-- Python PR workflow
-- no Scala source directory
-
-### Scala
-
-Use this when the repository only needs Scala code.
-
-Typical output:
-
-- one Scala package folder
-- Scala PR workflow
-- no Python source directory
-
-### Hybrid
-
-Use this when the repository needs both Python and Scala.
-
-Typical output:
-
-- one Python package folder
-- one Scala package folder
-- both PR workflows
-
 ## Typical Generated Structure
 
 The exact structure depends on the selected type, but the repository generally looks like this:
@@ -206,19 +174,6 @@ What this does depends on the repository type:
 - Scala: runs `sbt compile`
 - Hybrid: runs both operations
 
-### Step 3. Run tests
-
-Run:
-
-```bash
-make test
-```
-
-What this does depends on the repository type:
-
-- Python: runs `pytest`
-- Scala: runs `sbt test`
-- Hybrid: runs both
 
 ### Step 4. Run the local CI flow
 
@@ -274,40 +229,6 @@ To override the profile one time without editing files:
 ```bash
 make validate DATABRICKS_PROFILE=my-profile
 ```
-
-## GitHub Actions Behavior
-
-The template includes GitHub Actions PR workflows.
-
-### Python PR workflow
-
-For Python repositories, the PR workflow typically:
-
-- triggers on pull requests to `main`
-- runs only when Python files or the workflow definition change
-- installs `uv`
-- synchronizes development dependencies
-- runs formatting checks
-- runs lint checks
-
-### Scala PR workflow
-
-For Scala repositories, the PR workflow typically:
-
-- triggers on pull requests to `main`
-- runs only when Scala files or the workflow definition change
-- sets up Java
-- sets up sbt with dependency caching
-- runs `sbt clean compile test`
-
-### Reusable build/deploy action
-
-The repository also contains a reusable composite GitHub action under `.github/actions/build-and-deploy/action.yml`.
-
-That action is intended for Databricks-oriented build and deploy automation and supports both:
-
-- Scala build and deploy flows
-- Python build and deploy flows
 
 ## Detailed Example
 
@@ -384,9 +305,3 @@ If a user wants to change CI behavior later:
 - update the workflow files under `.github/workflows/`
 - update the reusable action under `.github/actions/build-and-deploy/action.yml`
 
-## Notes and Limitations
-
-- Python local setup currently uses `python3 -m venv` from the Makefile, while Python PR checks use `uv` in CI.
-- Scala builds may require access to private package registries depending on the dependency set.
-- Databricks validation and deployment require a working Databricks CLI configuration on the user machine.
-- The template simplifies common project setup, but repository-specific business logic and deployment policy still need to be implemented by the repository owner.
