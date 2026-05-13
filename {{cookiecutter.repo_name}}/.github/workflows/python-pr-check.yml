@@ -1,26 +1,37 @@
-name: PR CI
+name: PR Check - Python
 
 on:
   pull_request:
+    branches:
+      - main
+    paths:
+      - '{{ cookiecutter.__python_package_name }}/**'
+      - '.github/actions/build-and-deploy/action.yml'
+      - '.github/workflows/python-pr-check.yml'
 
 permissions:
   contents: read
-  packages: read
+  pull-requests: read
 
 jobs:
-  ci:
+  lint:
     runs-on: ubuntu-latest
-    env:
-      GITHUB_ACTOR: "{{ '${{ github.actor }}' }}"
-      GITHUB_TOKEN: "{{ '${{ secrets.GITHUB_TOKEN }}' }}"
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Run PR build workflow
-        uses: ./.github/actions/build-and-deploy
-        with:
-          project_type: "{{ cookiecutter.__project_type }}"
-          python_version: "3.11"
-          run_tests: "false"
-          run_databricks_validate: "false"
+      - name: Install uv
+        uses: astral-sh/setup-uv@v5
+
+      - name: Install dependencies
+        working-directory: "{{ cookiecutter.__python_package_name }}"
+        run: uv sync --group dev
+
+      - name: Check code formatting
+        working-directory: "{{ cookiecutter.__python_package_name }}"
+        run: uv run ruff format --check --diff src/
+
+      - name: Lint code
+        working-directory: "{{ cookiecutter.__python_package_name }}"
+        run: uv run ruff check src/
