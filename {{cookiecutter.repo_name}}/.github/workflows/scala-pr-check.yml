@@ -1,26 +1,44 @@
-name: PR CI
+name: PR Check - Scala
 
 on:
   pull_request:
+    branches:
+      - main
+    paths:
+      - '{{ cookiecutter.__scala_package_name }}/**'
+      - '.github/actions/build-and-deploy/action.yml'
+      - '.github/workflows/scala-pr-check.yml'
 
 permissions:
   contents: read
+  pull-requests: read
   packages: read
 
 jobs:
-  ci:
+  build:
     runs-on: ubuntu-latest
     env:
       GITHUB_ACTOR: "{{ '${{ github.actor }}' }}"
       GITHUB_TOKEN: "{{ '${{ secrets.GITHUB_TOKEN }}' }}"
 
     steps:
-      - uses: actions/checkout@v4
+      - name: Checkout code
+        uses: actions/checkout@v4
 
-      - name: Run PR build workflow
-        uses: ./.github/actions/build-and-deploy
+      - name: Set up Java
+        uses: actions/setup-java@v4
         with:
-          project_type: "{{ cookiecutter.__project_type }}"
-          python_version: "3.11"
-          run_tests: "false"
-          run_databricks_validate: "false"
+          distribution: temurin
+          java-version: "21"
+          cache: sbt
+          cache-dependency-path: |
+            {{ cookiecutter.__scala_package_name }}/**/*.sbt
+            {{ cookiecutter.__scala_package_name }}/project/build.properties
+            {{ cookiecutter.__scala_package_name }}/project/plugins.sbt
+
+      - name: Set up sbt
+        uses: sbt/setup-sbt@v1
+
+      - name: Run sbt clean test and compile
+        working-directory: "{{ cookiecutter.__scala_package_name }}"
+        run: sbt clean compile test

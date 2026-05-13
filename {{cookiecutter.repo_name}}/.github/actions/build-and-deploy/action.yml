@@ -1,57 +1,94 @@
-name: Build And Deploy
-description: Set up the project toolchain and run Makefile setup/build commands.
+name: Build and Deploy Databricks Bundle
+description: Build artifacts and deploy Databricks bundle to target environment.
 
 inputs:
-  project_type:
-    description: Generated project type.
+  target:
+    description: Databricks bundle target (for example dev, tst, prod).
     required: true
-  python_version:
-    description: Python version used for Python-capable projects.
-    required: false
-    default: "3.11"
-  run_tests:
-    description: Set to true to run Makefile tests after the build step.
-    required: false
-    default: "false"
-  run_databricks_validate:
-    description: Set to true to run Makefile validate after the build step.
+  working_directory:
+    description: Working directory for build commands.
+    required: true
+  is_python:
+    description: Set to true for Python builds and false for Scala builds.
     required: false
     default: "false"
 
 runs:
   using: composite
   steps:
-    - name: Set up Python
-      if: inputs.project_type == 'python' || inputs.project_type == 'hybrid'
-      uses: actions/setup-python@v5
-      with:
-        python-version: "{{ '${{ inputs.python_version }}' }}"
-
-    - name: Set up Java
-      if: inputs.project_type == 'scala' || inputs.project_type == 'hybrid'
-      uses: actions/setup-java@v4
-      with:
-        distribution: temurin
-        java-version: "21"
-
-    - name: Set up sbt
-      if: inputs.project_type == 'scala' || inputs.project_type == 'hybrid'
-      uses: sbt/setup-sbt@v1
-
-    - name: Run project setup
+    - name: Run sbt clean test and compile
+      if: inputs.is_python != 'true'
       shell: bash
-      run: make setup
+      working-directory: "{{ '${{ inputs.working_directory }}' }}"
+      env:
+        GITHUB_ACTOR: "{{ '${{ github.actor }}' }}"
+        GITHUB_TOKEN: "{{ '${{ github.token }}' }}"
+      run: sbt clean compile test
 
-    - name: Run project build
+    - name: Extract version from sbt
+      id: get_version
+      if: inputs.is_python != 'true'
       shell: bash
-      run: make build
+      working-directory: "{{ '${{ inputs.working_directory }}' }}"
+      env:
+        GITHUB_ACTOR: "{{ '${{ github.actor }}' }}"
+        GITHUB_TOKEN: "{{ '${{ github.token }}' }}"
+      run: |
+        VERSION=$(sbt -Dsbt.log.noformat=true "show version" | tail -n 1 | tr -d ' ' | grep -Eo '[0-9]+\.[0-9]+(\.[0-9]+)?(-[A-Za-z0-9.-]+)?$')
+        if [ -z "$VERSION" ]; then
+          echo "Error: Failed to extract version from sbt"
+          exit 1
+        fi
+        echo "version=$VERSION" >> "$GITHUB_OUTPUT"
+        echo "Extracted version: $VERSION"
 
-    - name: Run project tests
-      if: inputs.run_tests == 'true'
+    - name: Build artifacts
+      if: inputs.is_python != 'true'
       shell: bash
-      run: make test
+      working-directory: "{{ '${{ inputs.working_directory }}' }}"
+      env:
+        GITHUB_ACTOR: "{{ '${{ github.actor }}' }}"
+        GITHUB_TOKEN: "{{ '${{ github.token }}' }}"
+      run: sbt clean package
 
-    - name: Run Databricks validate
-      if: inputs.run_databricks_validate == 'true'
+    - name: Install dependencies
+      if: inputs.is_python == 'true'
       shell: bash
-      run: make validate
+      working-directory: "{{ '${{ inputs.working_directory }}' }}"
+      run: uv sync --group dev
+
+    - name: Check code formatting
+      if: inputs.is_python == 'true'
+      shell: bash
+      working-directory: "{{ '${{ inputs.working_directory }}' }}"
+      run: uv run ruff format --check --diff src/
+
+    - name: Lint code
+      if: inputs.is_python == 'true'
+      shell: bash
+      working-directory: "{{ '${{ inputs.working_directory }}' }}"
+      run: uv run ruff check src/
+
+    - name: Databricks bundle validate
+      shell: bash
+      working-directory: "{{ '${{ inputs.working_directory }}' }}"
+      env:
+        DATABRICKS_AUTH_TYPE: azure-cli
+      run: databricks bundle validate --target "{{ '${{ inputs.target }}' }}"
+
+    - name: Databricks bundle deploy (Scala)
+      if: inputs.is_python != 'true'
+      shell: bash
+      working-directory: "{{ '${{ inputs.working_directory }}' }}"
+      env:
+        ARM_USE_OIDC: true
+      run: |
+        databricks bundle deploy --target "{{ '${{ inputs.target }}' }}" --var="artifact_version={{ '${{ steps.get_version.outputs.version }}' }}"
+
+    - name: Databricks bundle deploy (Python)
+      if: inputs.is_python == 'true'
+      shell: bash
+      working-directory: "{{ '${{ inputs.working_directory }}' }}"
+      env:
+        ARM_USE_OIDC: true
+      run: databricks bundle deploy --target "{{ '${{ inputs.target }}' }}"

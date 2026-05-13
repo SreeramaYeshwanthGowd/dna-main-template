@@ -1,5 +1,4 @@
 import shutil
-import subprocess
 from pathlib import Path
 
 project_type = "{{ cookiecutter.__project_type }}"
@@ -123,33 +122,7 @@ elif project_type == "scala":
 
 elif project_type == "hybrid":
 
-    print("Removing duplicate Scala workflow and keeping a single PR workflow...")
-
-    if scala_workflow.exists():
-        scala_workflow.unlink()
-
-
-# Optional Python virtual environment
-
-
-if project_type in ["python", "hybrid"]:
-
-    python_project_dir = Path(python_package_name)
-
-    if not python_project_dir.exists():
-        python_project_dir = Path("python")
-
-    if shutil.which("python3"):
-
-        print("Creating Python virtual environment...")
-
-        subprocess.run(
-            ["python3", "-m", "venv", str(python_project_dir / ".venv")],
-            check=False
-        )
-
-    else:
-        print("WARNING: python3 not found. Skipping venv creation.")
+    print("Keeping both Python and Scala PR workflows for hybrid projects...")
 
 
 # Remove databricks.yml if Databricks DAB was not requested
