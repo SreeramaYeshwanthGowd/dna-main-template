@@ -1,0 +1,13 @@
+{
+  "repo_name": "dna-sample-service",
+
+  "project_name": "DNA Sample Service",
+
+  "author_name": "Your Name",
+
+  "package_name": "{{ cookiecutter.repo_name.replace('-', '_') }}",
+
+  "team_name": "DPS",
+
+  "spark_version": "3.5.0"
+}

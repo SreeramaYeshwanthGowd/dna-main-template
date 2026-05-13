@@ -1,0 +1,9 @@
+bundle:
+  name: "{{ cookiecutter.repo_name }}"
+
+targets:
+  dev:
+    mode: development
+    workspace:
+      host: "{{ cookiecutter.__databricks_host }}"
+      auth_type: azure-cli
