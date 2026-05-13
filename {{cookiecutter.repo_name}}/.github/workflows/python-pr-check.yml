@@ -4,10 +4,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - '{{ cookiecutter.__python_package_name }}/**'
-      - '.github/actions/build-and-deploy/action.yml'
-      - '.github/workflows/python-pr-check.yml'
 
 permissions:
   contents: read
