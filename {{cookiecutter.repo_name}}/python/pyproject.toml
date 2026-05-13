@@ -1,0 +1,30 @@
+{% if cookiecutter.__project_type in ["python", "hybrid"] %}
+
+[project]
+name = "{{ cookiecutter.repo_name }}"
+version = "0.1.0"
+description = "{{ cookiecutter.__project_type }}"
+requires-python = ">=3.10"
+
+authors = [
+  { name = "{{ cookiecutter.author_name }}" }
+]
+
+dependencies = [
+    "pyspark",
+    "databricks-dlt",
+]
+
+[dependency-groups]
+dev = [
+    "ruff>=0.9.0",
+]
+
+[tool.ruff]
+line-length = 100
+target-version = "py310"
+
+[tool.ruff.lint]
+select = ["E", "F", "I"]
+
+{% endif %}
