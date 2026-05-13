@@ -219,12 +219,6 @@ How it works:
 - `make validate` runs bundle validation using the default or supplied profile
 - `make deploy` runs bundle deployment using the default or supplied profile
 
-To override the profile one time without editing files:
-
-```bash
-make validate DATABRICKS_PROFILE=my-profile
-```
-
 ## Detailed Example
 
 Below is a full example of a user generating a Hybrid repository with Databricks support.
