@@ -4,10 +4,6 @@ on:
   pull_request:
     branches:
       - main
-    paths:
-      - '{{ cookiecutter.__scala_package_name }}/**'
-      - '.github/actions/build-and-deploy/action.yml'
-      - '.github/workflows/scala-pr-check.yml'
 
 permissions:
   contents: read
