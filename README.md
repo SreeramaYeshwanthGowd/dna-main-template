@@ -15,17 +15,13 @@ The goal of this guide is to help any user understand:
 
 1. [Overview](#overview)
 2. [What the Template Generates](#what-the-template-generates)
-3. [Supported Project Types](#supported-project-types)
-4. [Typical Generated Structure](#typical-generated-structure)
-5. [Prerequisites](#prerequisites)
-6. [How to Generate a Repository](#how-to-generate-a-repository)
-7. [Step-by-Step Usage After Generation](#step-by-step-usage-after-generation)
-8. [Makefile Utilities](#makefile-utilities)
-9. [Databricks Asset Bundle Usage](#databricks-asset-bundle-usage)
-10. [GitHub Actions Behavior](#github-actions-behavior)
-11. [Detailed Example](#detailed-example)
-12. [Changing Settings After Repository Creation](#changing-settings-after-repository-creation)
-13. [Notes and Limitations](#notes-and-limitations)
+3. [Typical Generated Structure](#typical-generated-structure)
+4. [Prerequisites](#prerequisites)
+5. [How to Generate a Repository](#how-to-generate-a-repository)
+6. [Step-by-Step Usage After Generation](#step-by-step-usage-after-generation)
+7. [Makefile Utilities](#makefile-utilities)
+8. [Databricks Asset Bundle Usage](#databricks-asset-bundle-usage)
+9. [Detailed Example](#detailed-example)
 
 ## Overview
 
@@ -174,8 +170,7 @@ What this does depends on the repository type:
 - Scala: runs `sbt compile`
 - Hybrid: runs both operations
 
-
-### Step 4. Run the local CI flow
+### Step 3. Run the local CI flow
 
 Run:
 
@@ -270,38 +265,3 @@ make build
 make test
 make validate
 ```
-
-### What the user gets
-
-- a Python package folder named `py_pkg`
-- a Scala package folder named `sc_pkg`
-- a generated `databricks.yml`
-- Python and Scala PR workflows
-- a Makefile with a standard command surface
-
-## Changing Settings After Repository Creation
-
-Once the repository is generated, the generation answers are no longer dynamic template inputs. They become normal files in the generated repository.
-
-If a user wants to change Databricks settings later:
-
-- change the Databricks host in `databricks.yml`
-- change the default Databricks profile in `Makefile`
-
-If a user wants to use a different profile one time:
-
-```bash
-make validate DATABRICKS_PROFILE=another-profile
-```
-
-If a user wants to change dependencies later:
-
-- update `pyproject.toml` for Python
-- update `build.sbt` for Scala
-- update `project/plugins.sbt` for Scala plugins
-
-If a user wants to change CI behavior later:
-
-- update the workflow files under `.github/workflows/`
-- update the reusable action under `.github/actions/build-and-deploy/action.yml`
-
