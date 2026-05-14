@@ -4,56 +4,67 @@ This repository is generated from the DNA consolidated Cookiecutter template. Th
 
 The goal of this guide is to help any user understand:
 
-- what the template generates
-- how to create a repository from it
+- how to create a repository from the template
 - how to work with the generated project locally
 - how Databricks Asset Bundle support works
-- how GitHub Actions are configured
-- where to change settings after project creation
+- what choices can be made during the template questionnaire
 
 ## Table of Contents
 
 1. [Overview](#overview)
-2. [What the Template Generates](#what-the-template-generates)
+2. [Questionnaire Decision Tree](#questionnaire-decision-tree)
 3. [Typical Generated Structure](#typical-generated-structure)
-4. [Prerequisites](#prerequisites)
-5. [How to Generate a Repository](#how-to-generate-a-repository)
-6. [Step-by-Step Usage After Generation](#step-by-step-usage-after-generation)
-7. [Makefile Utilities](#makefile-utilities)
-8. [Databricks Asset Bundle Usage](#databricks-asset-bundle-usage)
-9. [Detailed Example](#detailed-example)
+4. [How to Generate a Repository](#how-to-generate-a-repository)
+5. [After Local Repository Creation](#after-local-repository-creation)
+6. [Detailed Example](#detailed-example)
+7. [Cookiecutter Documentation](#cookiecutter-documentation)
 
 ## Overview
 
 The DNA consolidated template is designed to scaffold repositories for Databricks-oriented development with a consistent structure, consistent automation, and standard build commands.
 
-It supports three repository types:
+The template walks the user through a short questionnaire, generates the repository structure, and prepares the project for local development with a standard set of root-level commands.
 
-- Python
-- Scala
-- Hybrid
+## Questionnaire Decision Tree
 
-During generation, the template prompts the user for the basic project details, the package folder names, and whether Databricks Asset Bundle support should be included.
+The following flow chart shows the questionnaire path and the choices available during generation.
 
-After generation, the template automatically:
+```mermaid
+flowchart TD
+  A[Start cookiecutter generation] --> B[Select project type]
+  B -->|Python| C[Enter Python package folder name]
+  B -->|Scala| D[Enter Scala package folder name]
+  B -->|Hybrid| E[Enter Python package folder name]
+  E --> F[Enter Scala package folder name]
 
-- removes unused language folders
-- renames the language folders to the names supplied by the user
-- keeps only the workflows required for the generated repository type
-- optionally includes a ready-to-use `databricks.yml`
+  C --> G[Databricks DAB setup question]
+  D --> G
+  F --> G
 
-## What the Template Generates
+  G -->|Yes| H[Enter Databricks workspace host URL]
+  H --> I[Enter Databricks CLI profile name]
+  G -->|No| J[Skip Databricks config]
 
-The template gives users a ready repository with:
+  I --> K[Cookiecutter variable prompts]
+  J --> K
 
-- a top-level `Makefile` for setup, build, test, CI, and optional Databricks commands
-- Python project scaffolding when Python or Hybrid is selected
-- Scala project scaffolding when Scala or Hybrid is selected
-- GitHub Actions PR workflows
-- a reusable GitHub composite action for Databricks-oriented build and deploy scenarios
-- optional Databricks Asset Bundle configuration
+  K --> L[repo_name]
+  L --> M[project_name]
+  M --> N[author_name]
+  N --> O[team_name]
+  O --> P[spark_version]
 
-This template is meant to reduce manual setup and establish a consistent engineering baseline across repositories.
+  P -->|Python selected| Q[python_version]
+  P -->|Scala selected| R[scala_version]
+  P -->|Hybrid selected| R
+
+  R --> S[Generate repository]
+  Q --> S
+
+  S --> T[Remove unused folders]
+  T --> U[Rename language folders to chosen package names]
+  U --> V[Create final repository]
+```
 
 ## Typical Generated Structure
 
@@ -84,30 +95,15 @@ repo-root/
     src/
 ```
 
-## Prerequisites
+## How to Generate a Repository
 
-Install the tools that apply to your project type.
-
-General:
+Before generating a repository, make sure you have the following tools available as needed:
 
 - Git
 - Cookiecutter
-
-For Python projects:
-
-- Python 3.11 or later recommended
-
-For Scala projects:
-
-- Java 21
-- sbt
-
-For Databricks support:
-
-- Databricks CLI
-- a configured Databricks CLI profile on the user machine
-
-## How to Generate a Repository
+- Python 3.11 or later for Python-based projects
+- Java 21 and sbt for Scala-based projects
+- Databricks CLI if you plan to enable Databricks support
 
 Run Cookiecutter from the template root.
 
@@ -127,97 +123,13 @@ During generation, the template prompts for:
 - whether Databricks Asset Bundle support should be enabled
 - Databricks host and Databricks CLI profile if Databricks support is enabled
 
-If Hybrid is selected, the template asks separately for:
+## After Local Repository Creation
 
-- Python package folder name
-- Scala package folder name
+Use the generated repository as a starting point, not as a finished implementation.
 
-These names are then used to rename the generated language folders.
-
-## Step-by-Step Usage After Generation
-
-Once the repository is created, change into the repository root:
-
-```bash
-cd <generated-repository>
-```
-
-### Step 1. Set up the project
-
-Run:
-
-```bash
-make setup
-```
-
-What this does depends on the repository type:
-
-- Python: creates a local virtual environment inside the Python package folder
-- Scala: resolves Scala dependencies with sbt in CI-friendly batch mode
-- Hybrid: does both
-
-### Step 2. Build the project
-
-Run:
-
-```bash
-make build
-```
-
-What this does depends on the repository type:
-
-- Python: compiles Python source files
-- Scala: runs `sbt compile`
-- Hybrid: runs both operations
-
-### Step 3. Run the local CI flow
-
-Run:
-
-```bash
-make ci
-```
-
-This is the convenience command that runs the standard local CI sequence.
-
-- Without Databricks support: build + test
-- With Databricks support: build + test + bundle validation
-
-## Makefile Utilities
-
-The top-level `Makefile` is the main entry point for users.
-
-Common commands:
-
-- `make setup`
-- `make build`
-- `make test`
-- `make ci`
-
-If Databricks support is enabled, the following are also available:
-
-- `make validate`
-- `make deploy`
-
-This design keeps the user experience simple and avoids asking users to remember separate command sets for each language.
-
-## Databricks Asset Bundle Usage
-
-If Databricks support was enabled during generation, the repository includes `databricks.yml` and Makefile targets for validation and deployment.
-
-Typical commands:
-
-```bash
-make validate
-make deploy
-```
-
-How it works:
-
-- `databricks.yml` stores the Databricks workspace host
-- `Makefile` stores the default Databricks CLI profile
-- `make validate` runs bundle validation using the default or supplied profile
-- `make deploy` runs bundle deployment using the default or supplied profile
+- Create a new repository in GitHub with the same name as the generated project.
+- Adjust the generated code to meet your needs. The template creates boilerplate, and every real project will need customization.
+- Make your changes in a feature branch, create a pull request, and merge it into `main` after approval.
 
 ## Detailed Example
 
@@ -259,3 +171,9 @@ make build
 make test
 make validate
 ```
+
+## Cookiecutter Documentation
+
+For full Cookiecutter usage, prompts, replay files, template authoring, and advanced options, refer to the official documentation:
+
+https://cookiecutter.readthedocs.io/en/stable/
