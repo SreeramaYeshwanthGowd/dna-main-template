@@ -1,6 +1,6 @@
 # DNA Consolidated Template Guide
 
-The DNA consolidated Cookiecutter template is intended to provide a consistent starting point for Databricks-oriented repositories. Its purpose is to reduce repetitive setup work, establish a standard repository structure, and give teams a common foundation for Python, Scala, or Hybrid projects.
+The DNA consolidated Cookiecutter template is intended to provide a consistent starting point for repositories. Its purpose is to reduce repetitive setup work, establish a standard repository structure, and give teams a common foundation for Python, Scala, or Hybrid projects.
 
 The goal of this guide is to help any user understand:
 
