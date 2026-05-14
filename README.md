@@ -1,6 +1,6 @@
 # DNA Consolidated Template Guide
 
-This repository is generated from the DNA consolidated Cookiecutter template. This README is intentionally generic so it works for any repository created from the template, regardless of whether the generated project is Python, Scala, or Hybrid.
+The DNA consolidated Cookiecutter template is intended to provide a consistent starting point for Databricks-oriented repositories. Its purpose is to reduce repetitive setup work, establish a standard repository structure, and give teams a common foundation for Python, Scala, or Hybrid projects.
 
 The goal of this guide is to help any user understand:
 
@@ -160,16 +160,6 @@ Enter Databricks CLI profile name: dev-public
 [4/6] team_name (DPS): DPS
 [5/6] spark_version (3.5.0): 3.5.0
 [6/6] scala_version (2.12.18): 2.12.18
-```
-
-### After generation
-
-```bash
-cd dna-hybrid-service
-make setup
-make build
-make test
-make validate
 ```
 
 ## Cookiecutter Documentation
